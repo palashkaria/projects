@@ -1,0 +1,3 @@
+[submodule "external/clicky"]
+	path = external/clicky
+	url = https://github.com/farzaa/clicky

@@ -75,7 +75,7 @@ export function mountPinLayer(
     const meta = document.createElement("div");
     meta.className = "pc-pin-bubble-meta";
     const date = new Date(comment.createdAt).toLocaleString();
-    meta.textContent = comment.authorName ? `${comment.authorName} · ${date}` : date;
+    meta.textContent = comment.author ? `${comment.author.name} · ${date}` : date;
 
     const actions = document.createElement("div");
     actions.className = "pc-pin-bubble-actions";

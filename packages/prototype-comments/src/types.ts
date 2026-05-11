@@ -17,11 +17,16 @@ export type PinAnchor = {
 
 export type Placement = "document" | "viewport";
 
+export type Identity = {
+  name: string;
+  email: string;
+};
+
 export type Comment = {
   id: string;
   body: string;
   url: string;
-  authorName?: string;
+  author?: Identity;
   createdAt: number;
   anchor: Anchor;
   pin: PinAnchor;
@@ -51,8 +56,8 @@ export type PrototypeCommentsConfig = {
   accentColor?: string;
   /** Storage backend. Defaults to a localStorage adapter scoped to the current origin. */
   store?: CommentStore;
-  /** Optional author name; if absent, the widget prompts and persists in localStorage. */
-  authorName?: string;
+  /** Pre-set identity; if absent, the widget prompts on first comment and persists in localStorage. */
+  identity?: Identity;
   /** Override the URL key used for scoping comments. Defaults to `location.pathname`. */
   pageKey?: () => string;
   /** Fired after a comment is successfully created. */

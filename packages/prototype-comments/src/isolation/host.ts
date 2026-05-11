@@ -180,5 +180,61 @@ function buildStyles(accent: string): string {
 }
 .pc-pin-bubble-meta { font-size: 11px; color: rgba(0,0,0,0.5); }
 .pc-pin-bubble-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; }
+
+.pc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: ${Z_INDEX_HOST};
+  pointer-events: auto;
+}
+.pc-modal {
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: rgba(0,0,0,0.85);
+}
+.pc-modal-title { font-size: 16px; font-weight: 600; margin: 0; }
+.pc-modal-subtitle { font-size: 13px; color: rgba(0,0,0,0.55); margin: -6px 0 6px; }
+.pc-modal-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.65);
+}
+.pc-modal-input {
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  color: rgba(0,0,0,0.85);
+}
+.pc-modal-input:focus { border-color: ${accent}; box-shadow: 0 0 0 3px ${accent}33; }
+.pc-modal-error {
+  font-size: 12px;
+  color: #b91c1c;
+  margin-top: -4px;
+}
+.pc-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
 `;
 }

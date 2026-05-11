@@ -6,16 +6,17 @@ import { mountPinLayer } from "./pins/render.js";
 import { startSelection } from "./selection/overlay.js";
 import { createLocalStorageStore } from "./storage/index.js";
 import { mountFab } from "./ui/fab.js";
+import { promptIdentity } from "./ui/identity-dialog.js";
+import { loadIdentity, saveIdentity } from "./ui/identity.js";
 import type {
   CommentInput,
+  Identity,
   PrototypeCommentsConfig,
   PrototypeCommentsInstance,
 } from "./types.js";
 
-export type { Comment, CommentInput, CommentStore, PrototypeCommentsConfig, PrototypeCommentsInstance } from "./types.js";
+export type { Comment, CommentInput, CommentStore, Identity, PrototypeCommentsConfig, PrototypeCommentsInstance } from "./types.js";
 export { createLocalStorageStore } from "./storage/index.js";
-
-const AUTHOR_KEY = "__prototype_comments_author__";
 
 export function initPrototypeComments(
   config: PrototypeCommentsConfig = {},
@@ -78,11 +79,12 @@ export function initPrototypeComments(
     composerHandle = openComposer(widget.shadow, element, {
       onCancel: () => setMode("idle"),
       async onSubmit({ body }) {
-        const authorName = resolveAuthorName(config.authorName);
+        const author = await resolveIdentity(widget.shadow, config.identity);
+        if (!author) return; // user cancelled the identity prompt
         const input: CommentInput = {
           body,
           url: pageKey(),
-          authorName,
+          author,
           anchor,
           pin,
           placement,
@@ -122,18 +124,14 @@ export function initPrototypeComments(
   };
 }
 
-function resolveAuthorName(provided?: string): string | undefined {
+async function resolveIdentity(
+  shadow: ShadowRoot,
+  provided?: Identity,
+): Promise<Identity | null> {
   if (provided) return provided;
-  try {
-    const stored = localStorage.getItem(AUTHOR_KEY);
-    if (stored) return stored;
-    const entered = window.prompt("Your name (so others can see who left this comment):");
-    if (entered) {
-      localStorage.setItem(AUTHOR_KEY, entered);
-      return entered;
-    }
-  } catch {
-    // Ignore localStorage failures (private browsing, etc.)
-  }
-  return undefined;
+  const stored = loadIdentity();
+  if (stored) return stored;
+  const entered = await promptIdentity(shadow);
+  if (entered) saveIdentity(entered);
+  return entered;
 }

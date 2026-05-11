@@ -27,6 +27,7 @@ export function mountPinLayer(
   let bubble: HTMLElement | null = null;
   let bubbleCleanup: (() => void) | null = null;
   let bubbleUpdate: (() => void) | null = null;
+  let outsideClickHandler: ((e: Event) => void) | null = null;
 
   const renderPins = (comments: Comment[]) => {
     for (const node of nodes) node.el.remove();
@@ -113,12 +114,23 @@ export function mountPinLayer(
     bubbleUpdate = update;
     bubbleCleanup = autoUpdate(pinEl, bubbleEl, update);
 
-    setTimeout(() => {
-      document.addEventListener("mousedown", closeBubbleOnOutside, { capture: true, once: true });
-    }, 0);
+    // Close on click outside. composedPath() sees through the Shadow DOM
+    // boundary so we correctly detect clicks landing inside the bubble.
+    // Bubble phase (not capture) lets the pin's own e.stopPropagation()
+    // prevent the close-then-reopen flash when the pin is re-clicked.
+    outsideClickHandler = (e: Event) => {
+      if (!bubble) return;
+      if (e.composedPath().includes(bubble)) return;
+      closeBubble();
+    };
+    document.addEventListener("click", outsideClickHandler);
   };
 
   const closeBubble = () => {
+    if (outsideClickHandler) {
+      document.removeEventListener("click", outsideClickHandler);
+      outsideClickHandler = null;
+    }
     if (bubbleCleanup) {
       bubbleCleanup();
       bubbleCleanup = null;
@@ -127,12 +139,6 @@ export function mountPinLayer(
     if (bubble) {
       bubble.remove();
       bubble = null;
-    }
-  };
-
-  const closeBubbleOnOutside = (e: MouseEvent) => {
-    if (bubble && e.target instanceof Node && !bubble.contains(e.target)) {
-      closeBubble();
     }
   };
 

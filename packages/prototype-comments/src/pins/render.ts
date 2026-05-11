@@ -1,3 +1,4 @@
+import { autoUpdate, computePosition, flip, offset, shift } from "@floating-ui/dom";
 import type { Comment, CommentStore } from "../types.js";
 import { resolveAnchor } from "../anchoring/index.js";
 import { computePinPosition, type PinPosition } from "./math.js";
@@ -24,6 +25,7 @@ export function mountPinLayer(
 
   let nodes: Array<{ comment: Comment; el: HTMLElement; resolved: Element | null }> = [];
   let bubble: HTMLElement | null = null;
+  let bubbleCleanup: (() => void) | null = null;
 
   const renderPins = (comments: Comment[]) => {
     for (const node of nodes) node.el.remove();
@@ -92,9 +94,18 @@ export function mountPinLayer(
     bubble.append(body, meta, actions);
     shadow.appendChild(bubble);
 
-    const rect = pinEl.getBoundingClientRect();
-    bubble.style.top = `${rect.bottom + 8}px`;
-    bubble.style.left = `${Math.max(8, rect.left - 120)}px`;
+    const bubbleEl = bubble;
+    const update = () => {
+      computePosition(pinEl, bubbleEl, {
+        placement: "bottom-start",
+        strategy: "fixed",
+        middleware: [offset(8), flip(), shift({ padding: 8 })],
+      }).then(({ x, y }) => {
+        bubbleEl.style.left = `${x}px`;
+        bubbleEl.style.top = `${y}px`;
+      });
+    };
+    bubbleCleanup = autoUpdate(pinEl, bubbleEl, update);
 
     setTimeout(() => {
       document.addEventListener("mousedown", closeBubbleOnOutside, { capture: true, once: true });
@@ -102,6 +113,10 @@ export function mountPinLayer(
   };
 
   const closeBubble = () => {
+    if (bubbleCleanup) {
+      bubbleCleanup();
+      bubbleCleanup = null;
+    }
     if (bubble) {
       bubble.remove();
       bubble = null;

@@ -16,7 +16,7 @@ import type {
 } from "./types.js";
 
 export type { Comment, CommentInput, CommentStore, Identity, PrototypeCommentsConfig, PrototypeCommentsInstance } from "./types.js";
-export { createLocalStorageStore } from "./storage/index.js";
+export { createHttpStore, createLocalStorageStore, type HttpStoreConfig } from "./storage/index.js";
 
 export function initPrototypeComments(
   config: PrototypeCommentsConfig = {},

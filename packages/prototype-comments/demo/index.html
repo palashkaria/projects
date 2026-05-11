@@ -124,13 +124,25 @@
 
   <script src="../dist/index.global.js"></script>
   <script>
-    // The IIFE bundle exposes window.PrototypeComments
-    window.PrototypeComments.initPrototypeComments({
+    // The IIFE bundle exposes window.PrototypeComments.
+    // Append ?store=http to swap the localStorage adapter for the HTTP one
+    // (requires the comments-server running on :4040 with PROJECTS='{"demo":"sk_test_123"}').
+    const useHttp = new URLSearchParams(location.search).get("store") === "http";
+    const config = {
       accentColor: "#0066ff",
       onCreate(comment) {
         console.log("comment created:", comment);
       },
-    });
+    };
+    if (useHttp) {
+      config.store = window.PrototypeComments.createHttpStore({
+        endpoint: "http://localhost:4040",
+        projectId: "demo",
+        projectKey: "sk_test_123",
+        pollMs: 2000,
+      });
+    }
+    window.PrototypeComments.initPrototypeComments(config);
   </script>
 </body>
 </html>

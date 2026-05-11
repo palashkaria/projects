@@ -1,0 +1,31 @@
+{
+  "name": "@org/prototype-comments",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Drop-in <script>-tag widget for leaving comments anchored to elements on a prototype.",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": {
+      "@org/source": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./iife": "./dist/index.global.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.6.13",
+    "@medv/finder": "^3.2.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5"
+  }
+}

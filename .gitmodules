@@ -1,3 +1,9 @@
 [submodule "external/clicky"]
 	path = external/clicky
 	url = https://github.com/farzaa/clicky
+[submodule "external/faster-fixes"]
+	path = external/faster-fixes
+	url = https://github.com/manucoffin/faster-fixes
+[submodule "external/siteping"]
+	path = external/siteping
+	url = https://github.com/NeosiaNexus/SitePing

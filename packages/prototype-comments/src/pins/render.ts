@@ -26,6 +26,7 @@ export function mountPinLayer(
   let nodes: Array<{ comment: Comment; el: HTMLElement; resolved: Element | null }> = [];
   let bubble: HTMLElement | null = null;
   let bubbleCleanup: (() => void) | null = null;
+  let bubbleUpdate: (() => void) | null = null;
 
   const renderPins = (comments: Comment[]) => {
     for (const node of nodes) node.el.remove();
@@ -64,6 +65,10 @@ export function mountPinLayer(
       node.el.style.top = `${pos.top}px`;
       node.el.style.left = `${pos.left}px`;
     }
+    // Floating-UI's autoUpdate ancestor-scroll detection is unreliable when the
+    // reference element lives inside a closed Shadow DOM, so we also trigger
+    // the bubble's update from our own scroll/resize loop.
+    if (bubbleUpdate) bubbleUpdate();
   };
 
   const openBubble = (comment: Comment, pinEl: HTMLElement) => {
@@ -105,6 +110,7 @@ export function mountPinLayer(
         bubbleEl.style.top = `${y}px`;
       });
     };
+    bubbleUpdate = update;
     bubbleCleanup = autoUpdate(pinEl, bubbleEl, update);
 
     setTimeout(() => {
@@ -117,6 +123,7 @@ export function mountPinLayer(
       bubbleCleanup();
       bubbleCleanup = null;
     }
+    bubbleUpdate = null;
     if (bubble) {
       bubble.remove();
       bubble = null;

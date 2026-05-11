@@ -1,0 +1,23 @@
+{
+  "name": "@org/comments-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted Hono server backing @org/prototype-comments with SQLite storage.",
+  "type": "module",
+  "main": "src/main.ts",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "better-sqlite3": "^11.5.0",
+    "hono": "^4.6.12",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2"
+  }
+}

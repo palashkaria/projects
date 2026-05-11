@@ -5,6 +5,9 @@
   "references": [
     {
       "path": "./packages/prototype-comments"
+    },
+    {
+      "path": "./packages/comments-server"
     }
   ]
 }

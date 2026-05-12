@@ -1,106 +1,68 @@
-# New Nx Repository
+# projects workspace
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Nx + pnpm monorepo. Current focus: a drop-in widget for collecting feedback on prototypes, plus the self-hostable backend that stores it.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
-
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-## Finish your Nx platform setup
-
-🚀 [Finish setting up your workspace](https://cloud.nx.app/connect/OIflQ9rBb3) to get faster builds with remote caching, distributed task execution, and self-healing CI. [Learn more about Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud).
-## Generate a library
-
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
-```
-
-## Run tasks
-
-To build the library use:
-
-```sh
-npx nx build pkg1
-```
-
-To run any task with Nx use:
-
-```sh
-npx nx <target> <project-name>
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+## What lives here
 
 ```
-npx nx release
+apps/
+  safeskies-app/                  unrelated side app
+packages/
+  prototype-comments/             ← the widget (pure DOM, ESM + IIFE)
+  comments-server/                ← Hono + SQLite backend for the widget
+  dev-network-debugger/           unrelated dev tool
+external/                         git submodules of reference repos (read-only)
+  faster-fixes/                   hover-element interaction we adapted from
+  siteping/                       Shadow-DOM + anchoring patterns we adapted from
+  clicky/                         a separate exploration (Mac AI widget)
+docs/
+  vision.md                       why this exists + phased roadmap
+  architecture.md                 how the pieces fit together
+notes/                            working notes, not canonical docs
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+## Quick links
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **What we're building and why** → [docs/vision.md](./docs/vision.md)
+- **How it works under the hood** → [docs/architecture.md](./docs/architecture.md)
+- **Use the widget** → [packages/prototype-comments/README.md](./packages/prototype-comments/README.md)
+- **Run the backend** → [packages/comments-server/README.md](./packages/comments-server/README.md)
 
-## Keep TypeScript project references up to date
+## End-to-end demo
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+In one terminal, boot the server:
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+```bash
+PROJECTS='{"demo":"sk_test_123"}' pnpm --filter @org/comments-server dev
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+In another, build the widget and serve the demo page:
 
-```sh
-npx nx sync:check
+```bash
+pnpm --filter @org/prototype-comments build
+cd packages/prototype-comments
+python3 -m http.server 8765
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+Open `http://127.0.0.1:8765/demo/index.html?store=http` — the `?store=http` switches the widget from localStorage to the HTTP adapter. Leave a comment, reload, watch the pin reappear at the right element.
 
-## Nx Cloud
+Drop `?store=http` to see the localStorage default — works without the server running.
 
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+## Workspace conventions
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **Package manager:** `pnpm`. Always prefix commands (`pnpm nx …`, `pnpm --filter @org/foo …`).
+- **TypeScript:** strict, `customConditions: ["@org/source"]` so packages consume each other directly from `src/` in dev.
+- **External clones in `external/`:** added explicitly as git submodules, opt-in to `pnpm-workspace.yaml`. Default assumption: they're for reading, not linking.
+- **No project.json files yet:** packages are inferred from `package.json` via `@nx/js/typescript`.
 
-### Set up CI (non-Github Actions CI)
+See [CLAUDE.md](./CLAUDE.md) for the workflow instructions an AI assistant in this repo follows.
 
-**Note:** This is only required if your CI provider is not GitHub Actions.
+## Standard tasks
 
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+```bash
+pnpm install                                          # install everything
+pnpm nx typecheck @org/prototype-comments             # strict TS check on one package
+pnpm nx sync                                          # refresh TS project references
+pnpm --filter @org/prototype-comments build           # build distributables
+pnpm --filter @org/comments-server dev                # run the backend
 ```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)

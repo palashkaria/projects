@@ -8,6 +8,12 @@
     },
     {
       "path": "./packages/comments-server"
+    },
+    {
+      "path": "./packages/herdr-activity"
+    },
+    {
+      "path": "./apps/herdr-plugin"
     }
   ]
 }

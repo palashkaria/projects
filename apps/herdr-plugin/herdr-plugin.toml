@@ -1,0 +1,29 @@
+id = "local.herdr-activity"
+name = "Herdr Activity"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "Workspace activity and connection health, using a shared read-only local observer."
+platforms = ["macos", "linux"]
+
+[[panes]]
+id = "activity"
+title = "Herdr Activity"
+placement = "popup"
+command = ["node", "dist/main.js", "popup"]
+width = 100
+height = 30
+
+[[actions]]
+id = "activity"
+title = "Open activity"
+command = ["node", "dist/main.js", "open"]
+
+[[actions]]
+id = "setup"
+title = "Save default activity API connection"
+command = ["node", "dist/main.js", "setup"]
+
+[[actions]]
+id = "unsetup"
+title = "Remove owned activity API configuration"
+command = ["node", "dist/main.js", "unsetup"]

@@ -1,0 +1,68 @@
+{
+  "name": "@org/herdr-plugin",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "defaultConfiguration": "production",
+        "options": {
+          "platform": "node",
+          "outputPath": "apps/herdr-plugin/dist",
+          "format": [
+            "esm"
+          ],
+          "bundle": true,
+          "main": "apps/herdr-plugin/src/main.ts",
+          "tsConfig": "apps/herdr-plugin/tsconfig.app.json",
+          "assets": [],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".js"
+            },
+            "packages": "bundle"
+          }
+        },
+        "configurations": {
+          "development": {},
+          "production": {
+            "esbuildOptions": {
+              "sourcemap": false,
+              "outExtension": {
+                ".js": ".js"
+              }
+            }
+          }
+        }
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "continuous": true,
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "command": "node apps/herdr-plugin/dist/main.js serve"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@org/herdr-activity": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --import tsx --test test/*.test.ts"
+  }
+}

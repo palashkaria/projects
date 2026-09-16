@@ -35,6 +35,8 @@ export function parseSnapshot(value) {
 export function connectActivity(onSnapshot, onError) {
   const controller = new AbortController();
   let stream;
+  let retry;
+  let stopped = false;
   let latest = null;
   const receive = (data) => {
     const snapshot = parseSnapshot(data);
@@ -54,19 +56,30 @@ export function connectActivity(onSnapshot, onError) {
     .catch((e) => {
       if (e.name !== 'AbortError' && !latest) onError(e.message);
     });
-  stream = new EventSource('/api/v1/events');
-  stream.addEventListener('snapshot', (event) => {
-    try {
-      receive(JSON.parse(event.data));
-    } catch (e) {
-      onError(e.message);
-    }
-  });
-  stream.onerror = () =>
-    onError(
-      'Read-only feed disconnected. Last received inventory is retained; reconnecting.'
-    );
+  const openStream = () => {
+    if (stopped) return;
+    stream = new EventSource('/api/v1/events');
+    stream.addEventListener('snapshot', (event) => {
+      try {
+        receive(JSON.parse(event.data));
+      } catch (e) {
+        onError(e.message);
+      }
+    });
+    stream.onerror = () => {
+      onError(
+        'Read-only feed disconnected. Last received inventory is retained; reconnecting.'
+      );
+      // Browsers may permanently close EventSource on a proxy 502.
+      // Recreate it explicitly so an unavailable bridge can recover later.
+      stream.close();
+      retry = setTimeout(openStream, 2000);
+    };
+  };
+  openStream();
   return () => {
+    stopped = true;
+    clearTimeout(retry);
     controller.abort();
     stream.close();
   };

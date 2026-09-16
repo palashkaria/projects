@@ -56,6 +56,10 @@ const server = createServer(async (req, res) => {
           'Content-Type': reply.headers['content-type'] || 'application/json',
           'Cache-Control': 'no-store',
         });
+        // An abruptly closed upstream must close the browser's SSE connection,
+        // otherwise EventSource never sees an error and cannot reconnect.
+        reply.on('aborted', () => res.destroy());
+        reply.on('error', () => res.destroy());
         reply.pipe(res);
       }
     );

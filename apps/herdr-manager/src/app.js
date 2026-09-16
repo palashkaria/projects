@@ -553,4 +553,16 @@ window.addEventListener('popstate', () => {
   render();
 });
 setSource();
-setInterval(updateFreshness, 1000);
+setInterval(() => {
+  if (
+    state.source === 'live' &&
+    state.receivedAt &&
+    !state.error &&
+    Date.now() - state.receivedAt > 10000
+  ) {
+    state.error =
+      'No snapshot received for 10 seconds. Cached inventory may be stale.';
+    render();
+  }
+  updateFreshness();
+}, 1000);

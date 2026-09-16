@@ -38,11 +38,7 @@ export function connectActivity(onSnapshot, onError) {
   let latest = null;
   const receive = (data) => {
     const snapshot = parseSnapshot(data);
-    if (
-      latest?.endpoint === snapshot.endpoint &&
-      latest.revision > snapshot.revision
-    )
-      return;
+    // Revisions restart with the observer; SSE delivery order is authoritative.
     latest = snapshot;
     onSnapshot(snapshot);
   };
@@ -51,7 +47,10 @@ export function connectActivity(onSnapshot, onError) {
       if (!r.ok) throw new Error('Shared activity server unavailable');
       return r.json();
     })
-    .then((data) => receive(data))
+    .then((data) => {
+      // A later-arriving initial GET must not replace a newer SSE snapshot.
+      if (!latest) receive(data);
+    })
     .catch((e) => {
       if (e.name !== 'AbortError' && !latest) onError(e.message);
     });

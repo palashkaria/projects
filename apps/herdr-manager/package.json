@@ -1,0 +1,30 @@
+{
+  "name": "@org/herdr-manager",
+  "private": true,
+  "type": "module",
+  "nx": {
+    "targets": {
+      "serve": {
+        "executor": "nx:run-commands",
+        "continuous": true,
+        "options": {
+          "command": "node apps/herdr-manager/preview.mjs"
+        }
+      },
+      "build": {
+        "executor": "nx:run-commands",
+        "outputs": [
+          "{projectRoot}/.prototype-dist"
+        ],
+        "options": {
+          "command": "node apps/herdr-manager/preview.mjs build"
+        },
+        "configurations": {
+          "development": {
+            "command": "node apps/herdr-manager/preview.mjs refresh"
+          }
+        }
+      }
+    }
+  }
+}
